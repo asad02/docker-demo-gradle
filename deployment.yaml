@@ -1,0 +1,84 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+  labels:
+    app: docker-demo
+    version: v1
+  name: docker-demo-v1
+  namespace: default
+spec:
+  replicas: 3
+  minReadySeconds: 45
+  selector:
+    matchLabels:
+      app: docker-demo
+      version: v1
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: docker-demo
+        version: v1
+    spec:
+      containers:
+        - image: asad02/docker-demo:0.0.2-RELEASE
+          imagePullPolicy: IfNotPresent
+          name: docker-demo
+      restartPolicy: Always
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+  labels:
+    app: docker-demo
+    version: v2
+  name: docker-demo-v2
+  namespace: default
+spec:
+  replicas: 3
+  minReadySeconds: 45
+  selector:
+    matchLabels:
+      app: docker-demo
+      version: v2
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: docker-demo
+        version: v2
+    spec:
+      containers:
+        - image: asad02/docker-demo:0.0.3-RELEASE
+          imagePullPolicy: IfNotPresent
+          name: docker-demo
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: docker-demo
+  name: docker-demo
+  namespace: default
+spec:
+  ports:
+    - nodePort: 32377
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: docker-demo
+    version: v1
+  sessionAffinity: None
+  type: LoadBalancer
